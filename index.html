@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PythonDOS</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            color: #fff;
+            font-family: monospace;
+        }
+
+        #menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        button {
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            margin-top: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #ccc;
+        }
+
+        #screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background: black;
+        }
+    </style>
+</head>
+<body>
+    <div id="menu">
+        <h1>PythonDOS</h1>
+        </p>We got Python95, Python98...BUT WHAT ABOUT MS-DOS?
+
+Supported OS For Now -
+FreeDOS</p>
+        <button onclick="startEmulator()">Start!</button>
+    </div>
+
+    <canvas id="screen"></canvas>
+
+    <script src="v86/v86.js"></script>
+    <script>
+        let emulator;
+
+        function startEmulator() {
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('screen').style.display = 'block';
+
+            emulator = new V86Starter({
+                wasm_path: "v86/v86.wasm",
+                bios: { url: "https://cdn.jsdelivr.net/npm/v86@latest/bios/seabios.bin" },
+                vga_bios: { url: "https://cdn.jsdelivr.net/npm/v86@latest/bios/vgabios.bin" },
+                cdrom: { url: "https://github.com/SlinkySlik/CDN3/releases/download/freedos/FD14LIVE.iso" },
+                autostart: true,
+                memory_size: 128 * 1024 * 1024,
+                screen_container: document.getElementById("screen"),
+                disable_network: true,
+                disable_audio: true
+            });
+        }
+    </script>
+</body>
+</html>
