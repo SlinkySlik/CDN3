@@ -2,126 +2,117 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <title>PythonDOS Emulator</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PythonDOS</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
-      width: 100%;
       height: 100%;
-      background: #000;
-      color: #fff;
-      font-family: monospace;
-    }
-
-    #menu {
+      background-color: #121212;
+      color: #00ff90;
+      font-family: Consolas, monospace;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100%;
-      text-align: center;
     }
 
     h1 {
+      margin-bottom: 10px;
       font-size: 2.5rem;
-      margin-bottom: 1.5rem;
     }
 
-    button {
-      background: #fff;
-      color: #000;
-      border: none;
-      padding: 0.75rem 2rem;
+    p {
+      margin: 0 0 20px;
       font-size: 1rem;
-      margin-top: 1rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    button:hover {
-      background: #ccc;
-    }
-
-    #screen {
-      display: none;
-      width: 100%;
-      height: 100%;
-      background: black;
     }
 
     #status {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
+      margin-bottom: 20px;
       color: #0f0;
-      font-size: 1rem;
     }
 
     #status.error {
       color: #f44;
     }
+
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      background: #00ff90;
+      color: #000;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background: #00cc70;
+    }
+
+    canvas {
+      display: none;
+      width: 100%;
+      height: 100%;
+      background: black;
+    }
   </style>
 
-  <!-- 1) Load the emulator library FIRST (from unpkg now) -->
-  <script src="https://unpkg.com/v86@latest/dist/libv86.full.js"></script>
+  <!-- Load your local libv86.js -->
+  <script src="libv86.js"></script>
 </head>
 <body>
-  <div id="menu">
-    <h1>PythonDOS</h1>
-    <p>We got Python95, Python98...BUT WHAT ABOUT MS-DOS?</p>
-    <p>Supported OS For Now - FreeDOS</p>
-    <button onclick="startEmulator()">Start!</button>
-  </div>
+  <h1>PythonDOS</h1>
+  <p>Python95, Python98...WHAT ABOUT MS-DOS?! SUPPORTED OSs - FreeDOS</p>
 
-  <div id="status"></div>
+  <div id="status">Ready to boot.</div>
+  <button onclick="startEmulator()">Start!</button>
+
   <canvas id="screen"></canvas>
 
-  <!-- 2) Then your application logic -->
   <script>
-    // Quick sanity‑check: is V86Starter loaded?
-    console.log("V86Starter is", typeof V86Starter);
-
     let emulator;
-    const status = document.getElementById('status');
+    const status = document.getElementById("status");
 
     function startEmulator() {
-      document.getElementById('menu').style.display = 'none';
-      status.textContent = 'Downloading ISO...';
-      document.getElementById('screen').style.display = 'block';
+      document.querySelector("button").style.display = "none";
+      status.textContent = "Downloading ISO and BIOS...";
+      document.getElementById("screen").style.display = "block";
 
       try {
         emulator = new V86Starter({
-          wasm_path: 'https://unpkg.com/v86@latest/dist/v86.wasm',
-          bios:       { url: 'v86/bios/seabios.bin' },
-          vga_bios:   { url: 'v86/bios/vgabios.bin' },
-          cdrom:      { url: 'https://github.com/SlinkySlik/CDN3/releases/download/freedos/FD14LIVE.iso' },
-          autostart:  true,
+          wasm_path: "v86.wasm",
+          bios: { url: "v86/bios/seabios.bin" },
+          vga_bios: { url: "v86/bios/vgabios.bin" },
+          cdrom: {
+            url: "https://github.com/SlinkySlik/CDN3/releases/download/freedos/FD14LIVE.iso"
+          },
+          autostart: true,
           memory_size: 128 * 1024 * 1024,
-          screen_container: document.getElementById('screen'),
+          screen_container: document.getElementById("screen"),
           disable_network: true,
           disable_audio: true
         });
 
-        emulator.add_listener('emulator-ready', () => {
-          status.textContent = 'Booting up...';
+        emulator.add_listener("emulator-ready", () => {
+          status.textContent = "Booting FreeDOS...";
         });
 
-        emulator.add_listener('emulator-error', (e) => {
-          status.textContent = 'Error: ' + (e.message || 'Emulator error');
-          status.classList.add('error');
+        emulator.add_listener("emulator-error", e => {
+          status.textContent = "Error: " + (e.message || "Unknown error");
+          status.classList.add("error");
           console.error(e);
         });
 
-      } catch (error) {
-        status.textContent = 'Initialization failed: ' + error;
-        status.classList.add('error');
-        console.error(error);
+      } catch (err) {
+        status.textContent = "Initialization failed: " + err;
+        status.classList.add("error");
+        console.error(err);
       }
     }
   </script>
 </body>
 </html>
+
 
