@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PythonDOS</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
-      width: 100%;
-      height: 100%;
-      background: #000;
-      color: #fff;
+      background: black;
+      color: white;
       font-family: monospace;
+      height: 100%;
     }
 
     #menu {
@@ -21,27 +20,6 @@
       align-items: center;
       justify-content: center;
       height: 100%;
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    button {
-      background: #fff;
-      color: #000;
-      border: none;
-      padding: 0.75rem 2rem;
-      font-size: 1rem;
-      margin-top: 1rem;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    button:hover {
-      background: #ccc;
     }
 
     #screen {
@@ -56,87 +34,75 @@
       top: 10px;
       left: 50%;
       transform: translateX(-50%);
-      color: #0f0;
+      color: lime;
       font-size: 1rem;
     }
 
     #status.error {
-      color: #f44;
+      color: red;
     }
   </style>
-
-  <!-- 1) Load the emulator library -->
-  <script src="v86/libv86.js" onload="initializeEmulator()"></script>
 </head>
 <body>
   <div id="menu">
     <h1>PythonDOS</h1>
     <p>We got Python95, Python98...BUT WHAT ABOUT MS-DOS?</p>
     <p>Supported OS For Now - FreeDOS</p>
-    <button onclick="startEmulator()">Start!</button>
+    <button id="startBtn">Start!</button>
   </div>
 
   <div id="status"></div>
   <canvas id="screen"></canvas>
 
-  <!-- 2) Application logic -->
+  <!-- Load emulator -->
+  <script src="v86/libv86.js"></script>
+
+  <!-- App logic -->
   <script>
-    // Function to initialize the emulator once the script is loaded
-    function initializeEmulator() {
-      if (typeof V86Starter === 'undefined') {
-        console.error('V86Starter is not defined');
-        status.textContent = 'Error: Emulator script did not load properly';
-        status.classList.add('error');
-      } else {
-        console.log('V86Starter loaded successfully');
-      }
-    }
-
-    let emulator;
     const status = document.getElementById('status');
+    const screen = document.getElementById('screen');
+    const menu = document.getElementById('menu');
+    const startBtn = document.getElementById('startBtn');
 
-    function startEmulator() {
-      document.getElementById('menu').style.display = 'none';
-      status.textContent = 'Downloading ISO...';
-      document.getElementById('screen').style.display = 'block';
-
-      try {
-        emulator = new V86Starter({
-          wasm_path: 'v86/v86.wasm',
-          bios: {
-            url: 'v86/bios/seabios.bin'
-          },
-          vga_bios: {
-            url: 'v86/bios/vgabios.bin'
-          },
-          cdrom: {
-            url: 'https://github.com/SlinkySlik/CDN3/releases/download/freedos/FD14LIVE.iso'
-          },
-          autostart: true,
-          memory_size: 128 * 1024 * 1024,
-          screen_container: document.getElementById('screen'),
-          disable_network: true,
-          disable_audio: true
-        });
-
-        emulator.add_listener('emulator-ready', () => {
-          status.textContent = 'Booting up...';
-        });
-
-        emulator.add_listener('emulator-error', (e) => {
-          status.textContent = 'Error: ' + (e.message || 'Emulator error');
-          status.classList.add('error');
-          console.error(e);
-        });
-
-      } catch (error) {
-        status.textContent = 'Initialization failed: ' + error;
-        status.classList.add('error');
-        console.error(error);
+    startBtn.addEventListener('click', () => {
+      if (typeof V86Starter === 'undefined') {
+        status.textContent = "Error: V86Starter is not defined";
+        status.classList.add("error");
+        console.error("libv86.js failed to load or did not define V86Starter.");
+        return;
       }
-    }
+
+      menu.style.display = 'none';
+      screen.style.display = 'block';
+      status.textContent = "Downloading ISO...";
+
+      const emulator = new V86Starter({
+        wasm_path: "v86/v86.wasm",
+        bios: { url: "v86/bios/seabios.bin" },
+        vga_bios: { url: "v86/bios/vgabios.bin" },
+        cdrom: {
+          url: "https://github.com/SlinkySlik/CDN3/releases/download/freedos/FD14LIVE.iso"
+        },
+        autostart: true,
+        memory_size: 128 * 1024 * 1024,
+        screen_container: screen,
+        disable_network: true,
+        disable_audio: true
+      });
+
+      emulator.add_listener("emulator-ready", () => {
+        status.textContent = "Booting up...";
+      });
+
+      emulator.add_listener("emulator-error", err => {
+        status.textContent = "Error: " + (err.message || "Unknown error");
+        status.classList.add("error");
+        console.error(err);
+      });
+    });
   </script>
 </body>
 </html>
+
 
 
