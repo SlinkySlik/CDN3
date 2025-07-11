@@ -55,16 +55,14 @@
 <body>
     <div id="menu">
         <h1>PythonDOS</h1>
-        </p>We got Python95, Python98...BUT WHAT ABOUT MS-DOS?
-
-Supported OS For Now -
-FreeDOS</p>
+        <p>We got Python95, Python98...BUT WHAT ABOUT MS-DOS?</p>
+        <p>Supported OS For Now - FreeDOS</p>
         <button onclick="startEmulator()">Start!</button>
     </div>
 
     <canvas id="screen"></canvas>
 
-    <script src="v86/v86.js"></script>
+    <script src="v86/libv86.js"></script>
     <script>
         let emulator;
 
@@ -74,8 +72,8 @@ FreeDOS</p>
 
             emulator = new V86Starter({
                 wasm_path: "v86/v86.wasm",
-                bios: { url: "https://cdn.jsdelivr.net/npm/v86@latest/bios/seabios.bin" },
-                vga_bios: { url: "https://cdn.jsdelivr.net/npm/v86@latest/bios/vgabios.bin" },
+                bios: { url: "v86/bios/seabios.bin" },
+                vga_bios: { url: "v86/bios/vgabios.bin" },
                 cdrom: { url: "https://github.com/SlinkySlik/CDN3/releases/download/freedos/FD14LIVE.iso" },
                 autostart: true,
                 memory_size: 128 * 1024 * 1024,
@@ -87,3 +85,4 @@ FreeDOS</p>
     </script>
 </body>
 </html>
+
