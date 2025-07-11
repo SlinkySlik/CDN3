@@ -65,8 +65,8 @@
     }
   </style>
 
-  <!-- 1) Load the emulator library FIRST (from CDN now) -->
-  <script src="https://cdn.jsdelivr.net/npm/v86@latest/dist/libv86.full.js"></script>
+  <!-- 1) Load the emulator library FIRST (from unpkg now) -->
+  <script src="https://unpkg.com/v86@latest/dist/libv86.full.js"></script>
 </head>
 <body>
   <div id="menu">
@@ -94,7 +94,7 @@
 
       try {
         emulator = new V86Starter({
-          wasm_path: 'v86/v86.wasm',
+          wasm_path: 'https://unpkg.com/v86@latest/dist/v86.wasm',
           bios:       { url: 'v86/bios/seabios.bin' },
           vga_bios:   { url: 'v86/bios/vgabios.bin' },
           cdrom:      { url: 'https://github.com/SlinkySlik/CDN3/releases/download/freedos/FD14LIVE.iso' },
@@ -124,3 +124,4 @@
   </script>
 </body>
 </html>
+
