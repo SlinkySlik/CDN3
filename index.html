@@ -50,6 +50,19 @@
             height: 100%;
             background: black;
         }
+
+        #status {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #0f0;
+            font-size: 1rem;
+        }
+
+        #status.error {
+            color: #f44;
+        }
     </style>
 </head>
 <body>
@@ -60,29 +73,48 @@
         <button onclick="startEmulator()">Start!</button>
     </div>
 
+    <div id="status"></div>
     <canvas id="screen"></canvas>
 
     <script src="v86/libv86.js"></script>
     <script>
         let emulator;
+        const status = document.getElementById('status');
 
         function startEmulator() {
             document.getElementById('menu').style.display = 'none';
+            status.textContent = 'Downloading ISO...';
             document.getElementById('screen').style.display = 'block';
 
-            emulator = new V86Starter({
-                wasm_path: "v86/v86.wasm",
-                bios: { url: "v86/bios/seabios.bin" },
-                vga_bios: { url: "v86/bios/vgabios.bin" },
-                cdrom: { url: "https://github.com/SlinkySlik/CDN3/releases/download/freedos/FD14LIVE.iso" },
-                autostart: true,
-                memory_size: 128 * 1024 * 1024,
-                screen_container: document.getElementById("screen"),
-                disable_network: true,
-                disable_audio: true
-            });
+            try {
+                emulator = new V86Starter({
+                    wasm_path: 'v86/v86.wasm',
+                    bios: { url: 'v86/bios/seabios.bin' },
+                    vga_bios: { url: 'v86/bios/vgabios.bin' },
+                    cdrom: { url: 'https://github.com/SlinkySlik/CDN3/releases/download/freedos/FD14LIVE.iso' },
+                    autostart: true,
+                    memory_size: 128 * 1024 * 1024,
+                    screen_container: document.getElementById('screen'),
+                    disable_network: true,
+                    disable_audio: true
+                });
+
+                emulator.add_listener('emulator-ready', () => {
+                    status.textContent = 'Booting up...';
+                });
+
+                emulator.add_listener('emulator-error', (e) => {
+                    status.textContent = 'Error: ' + (e.message || 'Emulator error');
+                    status.classList.add('error');
+                    console.error(e);
+                });
+
+            } catch (error) {
+                status.textContent = 'Initialization failed: ' + error;
+                status.classList.add('error');
+                console.error(error);
+            }
         }
     </script>
 </body>
 </html>
-
