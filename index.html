@@ -81,10 +81,7 @@
 
   <!-- 2) Application logic -->
   <script>
-    let emulator;
-    const status = document.getElementById('status');
-
-    // This function will be triggered when the script is loaded
+    // Function to initialize the emulator once the script is loaded
     function initializeEmulator() {
       if (typeof V86Starter === 'undefined') {
         console.error('V86Starter is not defined');
@@ -94,6 +91,9 @@
         console.log('V86Starter loaded successfully');
       }
     }
+
+    let emulator;
+    const status = document.getElementById('status');
 
     function startEmulator() {
       document.getElementById('menu').style.display = 'none';
