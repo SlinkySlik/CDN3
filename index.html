@@ -66,7 +66,7 @@
   </style>
 
   <!-- 1) Load the emulator library -->
-  <script src="v86/libv86.js"></script>
+  <script src="v86/libv86.js" onload="initializeEmulator()"></script>
 </head>
 <body>
   <div id="menu">
@@ -81,10 +81,19 @@
 
   <!-- 2) Application logic -->
   <script>
-    console.log("V86Starter is", typeof V86Starter);
-
     let emulator;
     const status = document.getElementById('status');
+
+    // This function will be triggered when the script is loaded
+    function initializeEmulator() {
+      if (typeof V86Starter === 'undefined') {
+        console.error('V86Starter is not defined');
+        status.textContent = 'Error: Emulator script did not load properly';
+        status.classList.add('error');
+      } else {
+        console.log('V86Starter loaded successfully');
+      }
+    }
 
     function startEmulator() {
       document.getElementById('menu').style.display = 'none';
