@@ -1,134 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>V86 Diagnostic</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PythonDOS</title>
   <style>
-    body {
-      font-family: monospace;
+    html, body {
+      margin: 0;
+      padding: 0;
       background: #000;
       color: #0f0;
-      padding: 20px;
+      font-family: monospace;
+      height: 100%;
     }
-    .test-result {
-      margin: 10px 0;
-      padding: 10px;
-      border: 1px solid #333;
+
+    #menu {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
     }
-    .success { border-color: #0f0; }
-    .error { border-color: #f44; color: #f44; }
-    .warning { border-color: #fa0; color: #fa0; }
-    pre { background: #111; padding: 10px; overflow-x: auto; }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      margin: 0.5rem 0;
+    }
+
+    button {
+      background: #0f0;
+      color: #000;
+      border: none;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      margin-top: 1rem;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #0c0;
+    }
+
+    #status {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #0f0;
+      font-size: 1rem;
+    }
+
+    #status.error {
+      color: #f44;
+    }
+
+    canvas {
+      display: none;
+      width: 100%;
+      height: 100%;
+      background: black;
+    }
   </style>
+
+  <!-- 1) Load the full v86 UMD bundle from copy.sh -->
+  <script src="https://copy.sh/v86/build/libv86.full.js"></script>
 </head>
 <body>
-  <h1>V86 Diagnostic Tests</h1>
-  
-  <div id="results"></div>
-  
+  <div id="menu">
+    <h1>PythonDOS</h1>
+    <p>We got Python95, Python98...<br>BUT WHAT ABOUT MS-DOS?</p>
+    <p>Supported OS: FreeDOS</p>
+    <button id="startBtn">Start Emulator</button>
+  </div>
+
+  <div id="status">Ready.</div>
+  <canvas id="screen"></canvas>
+
   <script>
-    const results = document.getElementById('results');
-    
-    function addResult(title, content, type = 'success') {
-      const div = document.createElement('div');
-      div.className = `test-result ${type}`;
-      div.innerHTML = `<h3>${title}</h3><pre>${content}</pre>`;
-      results.appendChild(div);
-    }
-    
-    // Test 1: Check if script loaded
-    addResult('Test 1: Script Loading', 'Testing script loading...', 'warning');
-    
-    // Test 2: Check global variables
-    const globals = Object.keys(window).filter(key => 
-      key.toLowerCase().includes('v86') || 
-      key.toLowerCase().includes('emulator') ||
-      key.toLowerCase().includes('starter')
-    );
-    addResult('Test 2: V86-related globals', 
-      globals.length > 0 ? globals.join(', ') : 'No V86-related globals found', 
-      globals.length > 0 ? 'success' : 'error'
-    );
-    
-    // Test 3: Direct V86Starter check
-    addResult('Test 3: V86Starter type', 
-      `typeof V86Starter: ${typeof V86Starter}`, 
-      typeof V86Starter === 'function' ? 'success' : 'error'
-    );
-    
-    // Test 4: Check if window.V86 exists
-    addResult('Test 4: window.V86 check', 
-      `typeof window.V86: ${typeof window.V86}`, 
-      typeof window.V86 !== 'undefined' ? 'success' : 'error'
-    );
-    
-    // Test 5: Try to access V86Starter from window
-    try {
-      const starter = window.V86Starter || window.V86?.Starter;
-      addResult('Test 5: Alternative V86Starter access', 
-        `Found via window: ${typeof starter}`, 
-        typeof starter === 'function' ? 'success' : 'error'
-      );
-    } catch (e) {
-      addResult('Test 5: Alternative access error', e.message, 'error');
-    }
-    
-    // Test 6: Check script tag
-    const scripts = Array.from(document.querySelectorAll('script')).map(s => s.src);
-    addResult('Test 6: Script tags', scripts.join('\n'), 'success');
-    
-    // Test 7: Network test - check if we can fetch the script
-    fetch('v86/libv86.js')
-      .then(response => {
-        addResult('Test 7: Network fetch', 
-          `Status: ${response.status}\nHeaders: ${JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2)}`, 
-          response.ok ? 'success' : 'error'
-        );
-        return response.text();
-      })
-      .then(text => {
-        const hasV86Starter = text.includes('V86Starter');
-        const hasFunction = text.includes('function V86Starter') || text.includes('V86Starter=function');
-        const fileSize = text.length;
-        
-        addResult('Test 8: File content analysis', 
-          `File size: ${fileSize} bytes\nContains 'V86Starter': ${hasV86Starter}\nContains V86Starter function: ${hasFunction}\nFirst 200 chars: ${text.substring(0, 200)}...`, 
-          hasV86Starter && hasFunction ? 'success' : 'error'
-        );
-      })
-      .catch(error => {
-        addResult('Test 7: Network error', error.message, 'error');
+    const status = document.getElementById('status');
+    const screen = document.getElementById('screen');
+    const menu = document.getElementById('menu');
+    const startBtn = document.getElementById('startBtn');
+
+    startBtn.addEventListener('click', () => {
+      if (typeof V86Starter === 'undefined') {
+        status.textContent = "Error: V86Starter is not defined";
+        status.classList.add("error");
+        console.error("Failed to load full v86 UMD bundle.");
+        return;
+      }
+
+      menu.style.display = 'none';
+      screen.style.display = 'block';
+      status.textContent = "Downloading ISO...";
+
+      const emulator = new V86Starter({
+        wasm_path:        "v86/v86.wasm",
+        bios:             { url: "v86/bios/seabios.bin" },
+        vga_bios:         { url: "v86/bios/vgabios.bin" },
+        cdrom:            { url: "https://github.com/SlinkySlik/CDN3/releases/download/freedos/FD14LIVE.iso" },
+        autostart:        true,
+        memory_size:      128 * 1024 * 1024,
+        screen_container: screen,
+        disable_network:  true,
+        disable_audio:    true
       });
-    
-    // Test 9: Check if it's a module vs UMD
-    setTimeout(() => {
-      const hasModule = typeof module !== 'undefined' && module.exports;
-      const hasRequire = typeof require !== 'undefined';
-      const hasDefine = typeof define !== 'undefined';
-      
-      addResult('Test 9: Module system detection', 
-        `Has module.exports: ${hasModule}\nHas require: ${hasRequire}\nHas define (AMD): ${hasDefine}`, 
-        'warning'
-      );
-      
-      // Test 10: Manual script execution test
-      const testScript = document.createElement('script');
-      testScript.onload = () => {
-        addResult('Test 10: Manual script load', 
-          `V86Starter after manual load: ${typeof V86Starter}`, 
-          typeof V86Starter === 'function' ? 'success' : 'error'
-        );
-      };
-      testScript.onerror = (e) => {
-        addResult('Test 10: Manual script error', e.message || 'Script failed to load', 'error');
-      };
-      testScript.src = 'v86/libv86.js?' + Date.now(); // Cache bust
-      document.head.appendChild(testScript);
-    }, 1000);
+
+      emulator.add_listener("emulator-ready", () => {
+        status.textContent = "Booting up...";
+      });
+
+      emulator.add_listener("emulator-error", (e) => {
+        status.textContent = "Error: " + (e.message || "Unknown error");
+        status.classList.add("error");
+        console.error(e);
+      });
+    });
   </script>
-  
-  <!-- Load your v86 script -->
-  <script src="v86/libv86.js"></script>
 </body>
 </html>
