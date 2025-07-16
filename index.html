@@ -68,6 +68,9 @@
       background: black;
     }
   </style>
+
+  <!-- Load the UMD bundle that defines window.V86Starter -->
+  <script src="v86/libv86.js"></script>
 </head>
 <body>
   <div id="menu">
@@ -80,47 +83,45 @@
   <div id="status">Ready.</div>
   <canvas id="screen"></canvas>
 
-  <!-- Load the ES module build locally, using a relative path -->
-  <script type="module">
-    import V86Starter from './v86/libv86.js';
-
+  <script>
     const status = document.getElementById('status');
     const screen = document.getElementById('screen');
     const menu   = document.getElementById('menu');
     const startBtn = document.getElementById('startBtn');
 
     startBtn.addEventListener('click', () => {
+      if (typeof V86Starter !== 'function') {
+        status.textContent = "Error: V86Starter is not defined";
+        status.classList.add("error");
+        console.error("UMD bundle failed to register V86Starter");
+        return;
+      }
+
       menu.style.display = 'none';
       screen.style.display = 'block';
       status.textContent = "Downloading ISO...";
 
-      try {
-        const emulator = new V86Starter({
-          wasm_path:        'v86/v86.wasm',
-          bios:             { url: 'v86/bios/seabios.bin' },
-          vga_bios:         { url: 'v86/bios/vgabios.bin' },
-          cdrom:            { url: 'https://github.com/SlinkySlik/CDN3/releases/download/freedos/FD14LIVE.iso' },
-          autostart:        true,
-          memory_size:      128 * 1024 * 1024,
-          screen_container: screen,
-          disable_network:  true,
-          disable_audio:    true
-        });
+      const emulator = new V86Starter({
+        wasm_path:        'v86/v86.wasm',
+        bios:             { url: 'v86/bios/seabios.bin' },
+        vga_bios:         { url: 'v86/bios/vgabios.bin' },
+        cdrom:            { url: 'https://github.com/SlinkySlik/CDN3/releases/download/freedos/FD14LIVE.iso' },
+        autostart:        true,
+        memory_size:      128 * 1024 * 1024,
+        screen_container: screen,
+        disable_network:  true,
+        disable_audio:    true
+      });
 
-        emulator.add_listener('emulator-ready', () => {
-          status.textContent = 'Booting up...';
-        });
+      emulator.add_listener('emulator-ready', () => {
+        status.textContent = 'Booting up...';
+      });
 
-        emulator.add_listener('emulator-error', e => {
-          status.textContent = 'Error: ' + (e.message || 'Unknown error');
-          status.classList.add('error');
-          console.error(e);
-        });
-      } catch (err) {
-        status.textContent = 'Initialization failed: ' + err;
+      emulator.add_listener('emulator-error', e => {
+        status.textContent = 'Error: ' + (e.message || 'Unknown error');
         status.classList.add('error');
-        console.error(err);
-      }
+        console.error(e);
+      });
     });
   </script>
 </body>
