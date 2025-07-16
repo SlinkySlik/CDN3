@@ -80,9 +80,9 @@
   <div id="status">Ready.</div>
   <canvas id="screen"></canvas>
 
-  <!-- Load your ESM build and import the named V86Starter export -->
+  <!-- Use the ES module build of v86 from jsDelivr -->
   <script type="module">
-    import { V86Starter } from './v86/libv86.js';
+    import V86Starter from 'v86/libv86.mjs';
 
     const status = document.getElementById('status');
     const screen = document.getElementById('screen');
