@@ -50,53 +50,7 @@
   <div id="status">Ready.</div>
   <canvas id="screen"></canvas>
 
-  <!-- Load the correct UMD bundle that defines V86Starter -->
-  <script src="./v86/libv86.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const status = document.getElementById('status');
-      const menu = document.getElementById('menu');
-      const screen = document.getElementById('screen');
-      const startBtn = document.getElementById('startBtn');
-      const osSelect = document.getElementById('os-select');
-      let emulator;
-
-      startBtn.addEventListener('click', () => {
-        if (typeof V86Starter !== 'function') {
-          status.textContent = 'Error: V86Starter is not defined';
-          status.classList.add('error');
-          console.error('V86Starter global not found');
-          return;
-        }
-
-        const isoURL = osSelect.value;
-        menu.style.display = 'none';
-        screen.style.display = 'block';
-        status.textContent = 'Initializing emulator...';
-
-        emulator = new V86Starter({
-          wasm_path:        './v86/v86.wasm',
-          bios:             { url: './v86/bios/seabios.bin' },
-          vga_bios:         { url: './v86/bios/vgabios.bin' },
-          cdrom:            { url: isoURL },
-          autostart:        false,
-          memory_size:      128 * 1024 * 1024,
-          screen_container: screen,
-          disable_network:  true,
-          disable_audio:    true
-        });
-
-        emulator.run();
-        emulator.add_listener('emulator-ready', () => {
-          status.textContent = 'Booting up...';
-        });
-        emulator.add_listener('emulator-error', e => {
-          status.textContent = 'Error: ' + (e.message || 'Unknown error');
-          status.classList.add('error');
-          console.error(e);
-        });
-      });
-    });
-  </script>
+  <!-- Load the full UMD demo bundle that sets up its own UI handlers -->
+  <script src="./v86/v86_all.js"></script>
 </body>
 </html>
