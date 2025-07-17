@@ -2,80 +2,101 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>V86 Emulator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PythonDOS</title>
   <style>
     body {
-      font-family: sans-serif;
-      background: #111;
-      color: #eee;
+      background-color: black;
+      color: white;
+      font-family: monospace;
       margin: 0;
-      padding: 1rem;
+      padding: 0;
+      text-align: center;
     }
-
-    #screen_container {
-      display: flex;
-      justify-content: center;
-      margin-top: 1rem;
+    #menu, #status {
+      padding: 2em;
     }
-
-    #start_button {
-      margin-top: 1rem;
-      padding: 0.5rem 1rem;
-      font-size: 16px;
-      cursor: pointer;
+    #screen {
+      display: none;
+      width: 100%;
+      height: 90vh;
+      background-color: #000;
     }
-
-    select {
-      font-size: 16px;
-      padding: 0.4rem;
+    #status.error {
+      color: red;
+    }
+    select, button {
+      font-size: 1em;
+      margin: 1em;
+      padding: 0.5em 1em;
     }
   </style>
 </head>
 <body>
+  <div id="menu">
+    <h1>PythonDOS</h1>
+    <p>We got Python95, Python98...<br>BUT WHAT ABOUT MS‑DOS?</p>
+    <p>Supported OS: FreeDOS</p>
 
-  <h1>V86 Emulator</h1>
-  <label for="os_select">Choose an OS image:</label>
-  <select id="os_select">
-    <option value="https://copy.sh/v86/images/buildroot-bzimage.bin|https://copy.sh/v86/images/buildroot-initrd.bin">Buildroot Linux</option>
-    <option value="https://copy.sh/v86/images/linux3.iso">Linux ISO (Demo)</option>
-    <option value="https://copy.sh/v86/images/freedos722.img">FreeDOS 7.22</option>
-  </select>
+    <label for="os-select">Choose your DOS ISO:</label>
+    <select id="os-select">
+      <option value="https://github.com/SlinkySlik/CDN3/releases/download/freedos/FD14LIVE.iso">FreeDOS 1.4 Live</option>
+      <option value="https://archive.org/download/FreeDOS-1.2/fd12cd.iso">FreeDOS 1.2</option>
+    </select><br>
 
-  <br>
-  <button id="start_button">Start Emulator</button>
+    <button id="startBtn">Start Emulator</button>
+  </div>
 
-  <div id="screen_container"></div>
+  <div id="status">Ready.</div>
+  <canvas id="screen"></canvas>
 
-  <!-- Load your local v86_all.js -->
+  <!-- Load the UMD bundle (must register V86Starter globally) -->
   <script src="https://slinkyslik.github.io/CDN3/v86/v86_all.js"></script>
-
   <script>
-    document.getElementById("start_button").addEventListener("click", () => {
-      const container = document.getElementById("screen_container");
-      container.innerHTML = ""; // clear previous emulator if any
+    document.addEventListener('DOMContentLoaded', () => {
+      const status = document.getElementById('status');
+      const menu = document.getElementById('menu');
+      const screen = document.getElementById('screen');
+      const startBtn = document.getElementById('startBtn');
+      const osSelect = document.getElementById('os-select');
+      let emulator;
 
-      const selection = document.getElementById("os_select").value.split("|");
-      const bzimage = selection[0] || "";
-      const initrd = selection[1] || "";
+      startBtn.addEventListener('click', () => {
+        if (typeof V86Starter !== 'function') {
+          status.textContent = 'Error: V86Starter is not defined';
+          status.classList.add('error');
+          console.error('V86Starter global not found');
+          return;
+        }
 
-      const emulator = new V86Starter({
-        wasm_path: "https://slinkyslik.github.io/CDN3/v86/v86.wasm",
-        memory_size: 64 * 1024 * 1024,
-        vga_memory_size: 2 * 1024 * 1024,
-        screen_container: container,
-        bios: {
-          url: "https://slinkyslik.github.io/CDN3/v86/bios/seabios.bin"
-        },
-        vga_bios: {
-          url: "https://slinkyslik.github.io/CDN3/v86/bios/vgabios.bin"
-        },
-        bzimage: bzimage ? { url: bzimage } : undefined,
-        initrd: initrd ? { url: initrd } : undefined,
-        cdrom: (bzimage === "" && initrd === "") ? { url: selection[0] } : undefined,
-        autostart: true
+        const isoURL = osSelect.value;
+        menu.style.display = 'none';
+        screen.style.display = 'block';
+        status.textContent = 'Initializing emulator...';
+
+        emulator = new V86Starter({
+          wasm_path:        './v86/v86.wasm',
+          bios:             { url: './v86/bios/seabios.bin' },
+          vga_bios:         { url: './v86/bios/vgabios.bin' },
+          cdrom:            { url: isoURL },
+          autostart:        false,
+          memory_size:      128 * 1024 * 1024,
+          screen_container: screen,
+          disable_network:  true,
+          disable_audio:    true
+        });
+
+        emulator.run();
+        emulator.add_listener('emulator-ready', () => {
+          status.textContent = 'Booting up...';
+        });
+        emulator.add_listener('emulator-error', e => {
+          status.textContent = 'Error: ' + (e.message || 'Unknown error');
+          status.classList.add('error');
+          console.error(e);
+        });
       });
     });
   </script>
-
 </body>
 </html>
