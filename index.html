@@ -30,8 +30,8 @@
   <div id="status">Ready.</div>
   <canvas id="screen"></canvas>
 
-  <!-- V86 assets served from the repo itself -->
-  <script src="https://raw.githubusercontent.com/SlinkySlik/CDN3/main/v86/libv86.js"></script>
+  <!-- V86 loader via jsDelivr -->
+  <script src="https://cdn.jsdelivr.net/npm/v86@1.0/libv86.js"></script>
 
   <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -54,9 +54,9 @@
       status.textContent   = 'Initializing emulator…';
 
       const emulator = new V86Starter({
-        wasm_path: 'https://raw.githubusercontent.com/SlinkySlik/CDN3/main/v86/v86.wasm',
-        bios:      { url: 'https://raw.githubusercontent.com/SlinkySlik/CDN3/main/v86/bios/seabios.bin' },
-        vga_bios:  { url: 'https://raw.githubusercontent.com/SlinkySlik/CDN3/main/v86/bios/vgabios.bin' },
+        wasm_path: 'https://cdn.jsdelivr.net/npm/v86@1.0/v86.wasm',
+        bios:      { url: 'https://cdn.jsdelivr.net/npm/v86@1.0/bios/seabios.bin' },
+        vga_bios:  { url: 'https://cdn.jsdelivr.net/npm/v86@1.0/bios/vgabios.bin' },
         cdrom:     { url: 'https://github.com/SlinkySlik/CDN3/releases/download/freedos/FD14LIVE.iso' },
         autostart: false,
         memory_size: 128 * 1024 * 1024,
