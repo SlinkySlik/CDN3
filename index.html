@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PythonDOS</title>
   <style>
     body{background:#000;color:#fff;font-family:monospace;margin:0;text-align:center}
@@ -29,10 +30,9 @@
   <div id="status">Ready.</div>
   <canvas id="screen"></canvas>
 
-  <!-- 1. load libv86.js from the repo itself -->
-  <script src="v86/libv86.js"></script>
+  <!-- load libv86.js from the repo (upper-case folder) -->
+  <script src="V86/libv86.js"></script>
 
-  <!-- 2. start the emulator -->
   <script>
   document.addEventListener('DOMContentLoaded', () => {
     const status   = document.getElementById('status');
@@ -54,9 +54,9 @@
       status.textContent   = 'Initializing emulator…';
 
       const emulator = new V86Starter({
-        wasm_path:        'v86/v86.wasm',
-        bios:             { url: 'v86/bios/seabios.bin' },
-        vga_bios:         { url: 'v86/bios/vgabios.bin' },
+        wasm_path:        'V86/v86.wasm',
+        bios:             { url: 'V86/bios/seabios.bin' },
+        vga_bios:         { url: 'V86/bios/vgabios.bin' },
         cdrom:            { url: isoURL },
         autostart:        false,
         memory_size:      128 * 1024 * 1024,
@@ -70,6 +70,7 @@
       emulator.add_listener('emulator-error', e => {
         status.textContent = 'Error: ' + (e.message || 'Unknown');
         status.classList.add('error');
+        console.error(e);
       });
     });
   });
